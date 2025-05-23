@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,32 +7,66 @@ import {
   StyleSheet,
   Image,
   ImageBackground,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import SHA256 from 'crypto-js/sha256';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Importando AsyncStorage
 
 export default function LoginScreen({ navigation }) {
   const [nome, setNome] = useState('');
   const [senha, setSenha] = useState('');
 
-  const handleLogin = () => {
-    console.log(`Nome: ${nome} | Senha: ${senha}`);
+  // Senha original: '1234'
+  const usuarioFixo = 'THsport';
+  const senhaHashFixa = SHA256('1234').toString(); // Hash da senha '1234'
+
+  // Função para salvar as credenciais do admin no AsyncStorage
+  const salvarCredenciais = async () => {
+    try {
+      await AsyncStorage.setItem('usuario', usuarioFixo);
+      await AsyncStorage.setItem('senha', senhaHashFixa);
+    } catch (error) {
+      console.error('Erro ao salvar as credenciais:', error);
+    }
   };
+
+  // Função para fazer o login e comparar as credenciais
+  const handleLogin = async () => {
+    const senhaDigitadaHash = SHA256(senha).toString();
+  
+    const usuarioSalvo = await AsyncStorage.getItem('usuario');
+    const senhaSalva = await AsyncStorage.getItem('senha');
+  
+    if (nome === usuarioSalvo && senhaDigitadaHash === senhaSalva) {
+      // Salvar o status de login do admin
+      await AsyncStorage.setItem('adminLogado', 'true'); // Marcar como admin
+      navigation.navigate('Admin');
+    } else {
+      Alert.alert('Erro', 'Nome ou senha incorretos!');
+    }
+  };
+  
+
+  // Função chamada quando o app é iniciado (para salvar as credenciais do admin)
+  useEffect(() => {
+    salvarCredenciais(); // Apenas faz isso uma vez para salvar as credenciais
+  }, []);
 
   return (
     <ImageBackground
       source={{ uri: 'https://i.postimg.cc/HW7MWNP7/temp-Imageqgq4-A6.avif' }}
       style={styles.backgroundImage}
-      imageStyle={{ opacity: 0.08 }}>
-      {/* Topo com seta no canto direito */}
+      imageStyle={{ opacity: 0.08 }}
+    >
       <View style={styles.topBar}>
         <View style={{ width: 28 }} />
-        <View /> {/* Espaço vazio para manter o centro */}
+        <View />
         <TouchableOpacity onPress={() => navigation.navigate('Home')}>
           <Ionicons name="arrow-forward" size={28} color="#000" />
         </TouchableOpacity>
       </View>
 
-      {/* Logo centralizada acima do texto ADMIN */}
       <View style={styles.logoContainer}>
         <Image source={require('./assets/Imagem2.png')} style={styles.logo} />
       </View>
@@ -86,7 +120,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     resizeMode: 'contain',
-    marginBottom: -10, // Cola mais no "ADMIN"
+    marginBottom: -10,
   },
   container: {
     flex: 1,

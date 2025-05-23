@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,6 +14,9 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native'; 
+
 
 const produtos = [
   {
@@ -139,6 +143,10 @@ const produtos = [
 ];
 
 export default function HomeScreen({ navigation }) {
+
+  
+  const [isAdmin, setIsAdmin] = useState(false);
+
   const [search, setSearch] = useState('');
   const [cart, setCart] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState({});
@@ -147,6 +155,25 @@ export default function HomeScreen({ navigation }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [marcaSelecionada, setMarcaSelecionada] = useState(null);
+
+  useEffect(
+    React.useCallback(() => {
+      const verificarAdmin = async () => {
+        const valor = await AsyncStorage.getItem('adminLogado');
+        if(valor === "true"){
+          setIsAdmin(true);
+        }
+        else{
+          setIsAdmin(false)
+        }
+        
+      };
+
+      verificarAdmin();
+    }, [])
+  );
+
+  
 
 const normalize = (text) =>
   text
@@ -252,28 +279,75 @@ const filtered = produtos.filter((p) => {
         </TouchableOpacity>
         <Image source={require('./assets/Imagem2.png')} style={styles.logo} />
 
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Cart', { cartItems: cart })}>
+        {!isAdmin && (
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Cart', { cartItems: cart })}>
+            <View style={styles.cartContainer}>
+              <Ionicons name="cart" size={28} color="#000" />
+              {cart.length > 0 && (
+                <View style={styles.cartBadge}>
+                  <Text style={styles.cartBadgeText}>{cart.length}</Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+        )}
+        {isAdmin && (
+          
           <View style={styles.cartContainer}>
-            <Ionicons name="cart" size={28} color="#000" />
-            {cart.length > 0 && (
-              <View style={styles.cartBadge}>
-                <Text style={styles.cartBadgeText}>{cart.length}</Text>
-              </View>
-            )}
+            <Ionicons name="cart" size={28} color="transparent" />
+              
           </View>
-        </TouchableOpacity>
+          
+        )}
+
+        
       </View>
 
       {showMenu && (
         <View style={styles.drawerMenu}>
-          <TouchableOpacity
-            onPress={() => {
-              setShowMenu(false);
-              navigation.navigate('Login');
-            }}>
-            <Text style={styles.menuItem}>Admin</Text>
-          </TouchableOpacity>
+          
+
+          {!isAdmin && (
+            <TouchableOpacity
+              onPress={async () => {
+                setShowMenu(false);
+                navigation.navigate('Login');
+                
+              }}
+            >  
+              <Text style={styles.menuItem}>Admin</Text>
+            </TouchableOpacity>
+          )}
+
+
+          {isAdmin && (
+            <TouchableOpacity
+              onPress={async () => {
+                setShowMenu(false);
+                navigation.navigate('Admin');
+                
+              }}
+            >  
+              <Text style={styles.menuItem}>Adicionar</Text>
+            </TouchableOpacity>
+          )}
+          
+          {isAdmin && (
+
+            <TouchableOpacity
+              onPress={async () => {
+                setShowMenu(false);
+                await AsyncStorage.setItem('adminLogado','false');
+                
+              }}
+            >  
+              <Text style={styles.menuItem}>Sair</Text>
+            </TouchableOpacity>
+          )}
+          
+
+
         </View>
       )}
 

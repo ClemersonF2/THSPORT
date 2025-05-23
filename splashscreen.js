@@ -10,7 +10,7 @@ export default function SplashScreen() {
     // Navega para a tela Home após 3 segundos (tempo de duração da animação)
     const timer = setTimeout(() => {
       navigation.replace('Home'); // 'replace' substitui a tela atual, evitando voltar para a tela de splash
-    }, 3000); // Ajuste o tempo conforme necessário
+    }, 4000); // Ajuste o tempo conforme necessário
 
     return () => clearTimeout(timer); // Limpa o timer se o componente for desmontado
   }, [navigation]);
