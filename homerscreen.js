@@ -259,11 +259,25 @@ const filtered = produtos.filter((p) => {
 
         {renderSizes(item.id)}
 
-        <TouchableOpacity
-          style={styles.botaoCarrinho}
-          onPress={() => handleAddToCart(item)}>
-          <Ionicons name="cart" size={24} color="black" />
-        </TouchableOpacity>
+        {isAdmin && (
+          
+          <TouchableOpacity
+            style={styles.botaoCarrinho}
+            onPress={() => handleAddToCart(item)}>
+            <Ionicons name="cart" size={24} color="black" />
+          </TouchableOpacity>  
+        )}
+
+        {!isAdmin && (
+          
+          <TouchableOpacity
+            style={styles.botaoCarrinho}
+            onPress={() => handleAddToCart(item)}>
+            <Ionicons name="close" size={24} color="black" />
+          </TouchableOpacity>
+          
+        )}
+
       </View>
     </View>
   );
@@ -294,10 +308,13 @@ const filtered = produtos.filter((p) => {
         )}
         {isAdmin && (
           
-          <View style={styles.cartContainer}>
-            <Ionicons name="cart" size={28} color="transparent" />
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Admin')}>
+            <View style={styles.cartContainer}>
+              <Ionicons name="book" size={28} color="#000" />
               
-          </View>
+            </View>
+          </TouchableOpacity>
           
         )}
 
@@ -321,17 +338,7 @@ const filtered = produtos.filter((p) => {
           )}
 
 
-          {isAdmin && (
-            <TouchableOpacity
-              onPress={async () => {
-                setShowMenu(false);
-                navigation.navigate('Admin');
-                
-              }}
-            >  
-              <Text style={styles.menuItem}>Adicionar</Text>
-            </TouchableOpacity>
-          )}
+          
           
           {isAdmin && (
 
@@ -342,7 +349,7 @@ const filtered = produtos.filter((p) => {
                 
               }}
             >  
-              <Text style={styles.menuItem}>Sair</Text>
+              <Text style={styles.menuItem}>SAIR</Text>
             </TouchableOpacity>
           )}
           
